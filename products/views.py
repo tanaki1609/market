@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Product
-from .serializers import ProductSerializer
+from .serializers import ProductSerializer, ProductValidateSerializer
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -47,14 +47,20 @@ def product_list_api_view(request):
         # Step 3. Return serialized products
         return Response(data=serializer.data)
     else:
-        # Step 1. Get data from BODY
-        name = request.data.get('name')
-        description = request.data.get('description')
-        price = request.data.get('price')
-        stock = request.data.get('stock')
-        is_active = request.data.get('is_active')
-        category_id = request.data.get('category_id')
-        tags = request.data.get('tags')
+        # Step 0. Validate Data
+        serializer = ProductValidateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={'errors': serializer.errors})
+
+        # Step 1. Get data from validated dict
+        name = serializer.validated_data.get('name')
+        description = serializer.validated_data.get('description')
+        price = serializer.validated_data.get('price')
+        stock = serializer.validated_data.get('stock')
+        is_active = serializer.validated_data.get('is_active')
+        category_id = serializer.validated_data.get('category_id')
+        tags = serializer.validated_data.get('tags')
 
         # Step 2. Create Product
         product = Product.objects.create(name=name, description=description, price=price,
