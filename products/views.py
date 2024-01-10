@@ -47,6 +47,7 @@ def product_list_api_view(request):
         # Step 3. Return serialized products
         return Response(data=serializer.data)
     else:
+        print(request.user)
         # Step 0. Validate Data
         serializer = ProductValidateSerializer(data=request.data)
         if not serializer.is_valid():
