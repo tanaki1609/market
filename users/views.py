@@ -1,6 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from rest_framework.views import APIView
+
 from .serializers import RegisterValidateSerializer, AuthorizeValidateSerializer
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
@@ -18,14 +20,14 @@ def register_api_view(request):
     return Response(status=201)
 
 
-@api_view(['POST'])
-def authorize_api_view(request):
-    serializer = AuthorizeValidateSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
+class AuthorizeAPIView(APIView):
+    def post(self, request):
+        serializer = AuthorizeValidateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    user = authenticate(**serializer.validated_data)
+        user = authenticate(**serializer.validated_data)
 
-    if user:
-        token, _ = Token.objects.get_or_create(user=user)
-        return Response(data={'key': token.key})
-    return Response(status=403, data={'error': 'User credential error!'})
+        if user:
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response(data={'key': token.key})
+        return Response(status=403, data={'error': 'User credential error!'})
