@@ -12,6 +12,7 @@ from rest_framework.viewsets import ModelViewSet
 
 
 class ProductListCreateAPIView(ListCreateAPIView):
+    """ Product list and create API """
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
